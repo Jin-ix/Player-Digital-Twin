@@ -5,9 +5,15 @@ pydantic==2.5.3
 pydantic-settings==2.1.0
 python-multipart==0.0.6
 python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+passlib==1.7.4
+bcrypt==4.0.1
 alembic==1.13.1
 python-dotenv==1.0.1
-celery==5.3.6
-redis==5.0.1
 httpx==0.26.0
+# AI & Vision
+ultralytics==8.1.0
+opencv-python-headless==4.9.0.80   <-- THIS IS THE FIX
+streamlit==1.30.0
+plotly==5.18.0
+pandas==2.2.0
+requests==2.31.0

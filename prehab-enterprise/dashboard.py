@@ -524,7 +524,12 @@ def render_coach_view():
                         st.error("API Error")
                 except Exception as e:
                     # MOCK FALLBACK
-                    st.warning(f"Backend Offline ({e}). Loading Simulation Engine...")
+                    # Suppress scary traceback for standard connection error
+                    error_msg = str(e)
+                    if "Connection refused" in error_msg or "NewConnectionError" in error_msg:
+                        st.warning("⚠️ Backend Connection Failed - Switching to Simulation Mode")
+                    else:
+                        st.warning(f"Backend Offline ({e}). Loading Simulation Engine...")
                     mock_anomalies = [{"day": 10, "val": 2500}, {"day": 20, "val": 3000}]
                     mock_forecast = [30 + i*2 + np.random.randint(-5, 5) for i in range(15)]
                     st.session_state.data = {

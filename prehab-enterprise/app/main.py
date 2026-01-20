@@ -1,27 +1,32 @@
 from fastapi import FastAPI
+from app.api.v1.api import api_router
 from app.core.config import settings
-from app.api.v1.endpoints import auth, analytics
-from app.db.base_class import Base
-from app.db.session import engine
+from app.db.database import engine, Base, SessionLocal
+from app.db.models import UserDB
+from app.core import security # <--- Use your existing security module
 
-# === CRITICAL FIX: Import ALL models here ===
-# This forces Python to "load" these files so SQLAlchemy knows they exist.
-from app.models.user import User
-from app.models.metrics import BiometricLog 
-# ============================================
+app = FastAPI(title="Prehab 2.0")
 
-# 1. Create Tables on Startup
-Base.metadata.create_all(bind=engine)
+@app.on_event("startup")
+def startup_db():
+    # 1. Create Tables
+    Base.metadata.create_all(bind=engine)
+    
+    # 2. Seed Data
+    db = SessionLocal()
+    if not db.query(UserDB).filter(UserDB.email == "coach@keralablasters.com").first():
+        coach = UserDB(
+            email="coach@keralablasters.com", 
+            hashed_password=security.get_password_hash("securepassword123"), # <--- Updated
+            role="coach", full_name="Coach Ivan"
+        )
+        p1 = UserDB(email="luna@keralablasters.com", hashed_password=security.get_password_hash("p1"), role="player", full_name="Adrian Luna")
+        p2 = UserDB(email="diaman@keralablasters.com", hashed_password=security.get_password_hash("p2"), role="player", full_name="Dimitrios")
+        
+        db.add(coach)
+        db.add_all([p1, p2])
+        db.commit()
+        print("✅ Database Seeded in Supabase")
+    db.close()
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
-)
-
-# 2. Register Routers
-app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["Authentication"])
-app.include_router(analytics.router, prefix=f"{settings.API_V1_STR}/analytics", tags=["Digital Twin Engine"])
-
-@app.get("/")
-def root():
-    return {"status": "Prehab System Secured & Ready"}
+app.include_router(api_router, prefix="/api/v1")

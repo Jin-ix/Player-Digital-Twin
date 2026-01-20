@@ -1,77 +1,31 @@
-import shutil
-import os
-from fastapi import APIRouter, Depends, File, UploadFile
-from app.api import deps
-from app.models.user import User
-from app.services.analysis_service import AnalysisService
-from app.core.vision_engine import VisionEngine
-
-# Import all sub-models used in the code
-from app.schemas.analytics import (
-    AnalysisInput, 
-    AnalysisResponse, 
-    MechanicsInput, 
-    LoadInput
-)
+# app/api/v1/endpoints/analytics.py
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List, Any
+from app.db.database import get_db
+from app.db.models import PlayerHistory
 
 router = APIRouter()
 
-# Initialize Services
-analyzer = AnalysisService()
-vision_model = VisionEngine()
-
-@router.post("/analyze", response_model=AnalysisResponse)
-async def analyze_my_data(
-    data: AnalysisInput, 
-    current_user: User = Depends(deps.get_current_user)
-):
+@router.get("/history", summary="Fetch History from Supabase")
+def get_player_history(
+    player_id: str = None, 
+    db: Session = Depends(get_db)
+) -> Any:
     """
-    Standard Endpoint: Accepts JSON data (manual entry) and returns risk report.
+    Fetch training history directly from the Supabase database.
+    Optional: Filter by player_id if provided.
     """
-    return await analyzer.process_metrics(current_user, data)
-
-@router.post("/analyze/video", response_model=AnalysisResponse)
-async def analyze_video_upload(
-    file: UploadFile = File(...), 
-    current_user: User = Depends(deps.get_current_user)
-):
-    """
-    AI Vision Endpoint:
-    1. Receives a video file.
-    2. Runs YOLOv8 Pose Estimation (Valgus, Hip, Foot Strike).
-    3. Feeds that data into the Digital Twin.
-    4. Returns the Injury Risk Report.
-    """
-    # 1. Save the video temporarily
-    temp_filename = f"temp_{file.filename}"
-    with open(temp_filename, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    query = db.query(PlayerHistory)
     
-    try:
-        # 2. Run AI Vision (Get Dictionary of results)
-        vision_results = vision_model.analyze_video(temp_filename)
-        
-        # 3. Feed data into Digital Twin Logic
-        # Extract new metrics
-        detected_valgus = vision_results["valgus"]
-        detected_hip = vision_results["hip_rotation"]
-        detected_strike = vision_results["foot_strike"]
+    # If the frontend sends a specific player ID, filter for it
+    if player_id:
+        query = query.filter(PlayerHistory.player_id == player_id)
+    
+    # Execute the query
+    history_data = query.all()
+    
+    if not history_data:
+        return {"msg": "No history data found", "data": []}
 
-        ai_data = AnalysisInput(
-            mechanics=MechanicsInput(
-                knee_valgus_angle=detected_valgus,
-                hip_internal_rotation=detected_hip,    # <--- NEW
-                foot_strike_pattern=detected_strike,   # <--- NEW
-                head_forward_angle=0.0 
-            ),
-            load_metrics=LoadInput(acwr=1.0) # Default load
-        )
-        
-        # 4. Get the Prescription/Report from the Brain
-        report = await analyzer.process_metrics(current_user, ai_data)
-        return report
-
-    finally:
-        # Cleanup: Delete the video file to save space
-        if os.path.exists(temp_filename):
-            os.remove(temp_filename)
+    return {"data": history_data}

@@ -238,8 +238,17 @@ def render_coach_view():
         with col_left:
             st.info("Upload game footage for frame-by-frame analysis.")
             uploaded_file = st.file_uploader("video_input", label_visibility="collapsed", type=['mp4', 'mov', 'avi'])
+            
             if uploaded_file:
-                st.video(uploaded_file)
+                # 1. Check File Size (Limit to 50MB to prevent browser crash)
+                if uploaded_file.size > 50 * 1024 * 1024:
+                    st.error("⚠️ File too large (>50MB). Please upload a smaller clip.")
+                    uploaded_file = None
+                else:
+                    try:
+                        st.video(uploaded_file)
+                    except Exception as e:
+                        st.error(f"Error rendering video: {e}")
         
         with col_right:
             if uploaded_file:
@@ -452,7 +461,8 @@ def render_coach_view():
                 
                 if use_db:
                     if not SUPABASE_URL or not SUPABASE_KEY:
-                        st.error("Missing Supabase Credentials")
+                        st.warning("⚠️ No database connection found. Running in Demo Mode.")
+                        st.caption("Add SUPABASE_URL and SUPABASE_KEY to Streamlit Secrets to enable cloud features.")
                     else:
                         try:
                             supabase = create_client(SUPABASE_URL, SUPABASE_KEY)

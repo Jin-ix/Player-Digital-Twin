@@ -244,106 +244,110 @@ def render_coach_view():
         with col_right:
             if uploaded_file:
                 if st.button("🚀 Execute Physics Engine + GNN", type="primary", use_container_width=True):
-                    with st.spinner("Processing Kinetic Chain..."):
-                        # MOCK DATA GENERATION FOR DEMO
-                        time.sleep(1.5) # Simulate processing
-                        
-                        # Data for Timeline
-                        frames = list(range(0, 50))
-                        knee_flexion = [45 + 15 * np.sin(i/5) for i in frames]
-                        valgus_stress = [5 + 2 * np.cos(i/3) + np.random.normal(0, 0.5) for i in frames]
-                        
-                        # Data for GRF
-                        grf_left = [0 if i < 10 or i > 40 else 800 + 100*np.random.randn() for i in frames]
-                        grf_right = [0 if i < 12 or i > 42 else 750 + 100*np.random.randn() for i in frames]
+                    try:
+                        with st.spinner("Processing Kinetic Chain..."):
+                            # MOCK DATA GENERATION FOR DEMO
+                            time.sleep(1.5) # Simulate processing
+                            
+                            # Data for Timeline
+                            frames = list(range(0, 50))
+                            knee_flexion = [45 + 15 * np.sin(i/5) for i in frames]
+                            valgus_stress = [5 + 2 * np.cos(i/3) + np.random.normal(0, 0.5) for i in frames]
+                            
+                            # Data for GRF
+                            grf_left = [0 if i < 10 or i > 40 else 800 + 100*np.random.randn() for i in frames]
+                            grf_right = [0 if i < 12 or i > 42 else 750 + 100*np.random.randn() for i in frames]
 
-                        # 1. METRIC CARDS
-                        m1, m2, m3, m4 = st.columns(4)
-                        m1.metric("ACL Risk Probability", "78.5%", "+12%", delta_color="inverse")
-                        m2.metric("Critical Failure", "L_Knee", "Unstable")
-                        m3.metric("Peak Valgus", "18.5°", "High Risk")
-                        m4.metric("Landing Force", "3.2 BW", "Normal")
+                            # 1. METRIC CARDS
+                            m1, m2, m3, m4 = st.columns(4)
+                            m1.metric("ACL Risk Probability", "78.5%", "+12%", delta_color="inverse")
+                            m2.metric("Critical Failure", "L_Knee", "Unstable")
+                            m3.metric("Peak Valgus", "18.5°", "High Risk")
+                            m4.metric("Landing Force", "3.2 BW", "Normal")
 
-                        st.divider()
+                            st.divider()
 
-                        # --- ROW 1: CORE BIOMECHANICS ---
-                        c1, c2, c3 = st.columns(3)
-                        
-                        with c1:
-                            st.markdown("#### 1️⃣ Joint Dependency Graph")
-                            fig_gnn = go.Figure()
-                            nodes = ["Hip", "Knee", "Ankle", "Foot"]
-                            x_nodes = [1, 2, 2, 1]
-                            y_nodes = [3, 2, 1, 0]
-                            fig_gnn.add_trace(go.Scatter(x=x_nodes, y=y_nodes, mode='lines', line=dict(color='#30363D', width=2), hoverinfo='none'))
-                            fig_gnn.add_trace(go.Scatter(
-                                x=x_nodes, y=y_nodes, mode='markers+text', text=nodes, textposition="top right",
-                                marker=dict(size=20, color=['#00CC96', '#EF553B', '#FFA15A', '#00CC96'])
-                            ))
-                            fig_gnn.update_layout(height=250, margin=dict(l=10, r=10, t=10, b=10), xaxis=dict(visible=False), yaxis=dict(visible=False), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-                            st.plotly_chart(fig_gnn, use_container_width=True)
+                            # --- ROW 1: CORE BIOMECHANICS ---
+                            c1, c2, c3 = st.columns(3)
+                            
+                            with c1:
+                                st.markdown("#### 1️⃣ Joint Dependency Graph")
+                                fig_gnn = go.Figure()
+                                nodes = ["Hip", "Knee", "Ankle", "Foot"]
+                                x_nodes = [1, 2, 2, 1]
+                                y_nodes = [3, 2, 1, 0]
+                                fig_gnn.add_trace(go.Scatter(x=x_nodes, y=y_nodes, mode='lines', line=dict(color='#30363D', width=2), hoverinfo='none'))
+                                fig_gnn.add_trace(go.Scatter(
+                                    x=x_nodes, y=y_nodes, mode='markers+text', text=nodes, textposition="top right",
+                                    marker=dict(size=20, color=['#00CC96', '#EF553B', '#FFA15A', '#00CC96'])
+                                ))
+                                fig_gnn.update_layout(height=250, margin=dict(l=10, r=10, t=10, b=10), xaxis=dict(visible=False), yaxis=dict(visible=False), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+                                st.plotly_chart(fig_gnn, use_container_width=True)
 
-                        with c2:
-                            st.markdown("#### 2️⃣ Dynamic ACL Risk Gauge")
-                            fig_gauge = go.Figure(go.Indicator(
-                                mode = "gauge+number", value = 18.5,
-                                domain = {'x': [0, 1], 'y': [0, 1]},
-                                gauge = {
-                                    'axis': {'range': [0, 30]}, 
-                                    'bar': {'color': "#EF553B"},
-                                    'steps': [{'range': [0, 15], 'color': "#00CC96"}, {'range': [15, 30], 'color': "#30363D"}]
-                                }
-                            ))
-                            fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=30, b=20), paper_bgcolor='rgba(0,0,0,0)')
-                            st.plotly_chart(fig_gauge, use_container_width=True)
+                            with c2:
+                                st.markdown("#### 2️⃣ Dynamic ACL Risk Gauge")
+                                fig_gauge = go.Figure(go.Indicator(
+                                    mode = "gauge+number", value = 18.5,
+                                    domain = {'x': [0, 1], 'y': [0, 1]},
+                                    gauge = {
+                                        'axis': {'range': [0, 30]}, 
+                                        'bar': {'color': "#EF553B"},
+                                        'steps': [{'range': [0, 15], 'color': "#00CC96"}, {'range': [15, 30], 'color': "#30363D"}]
+                                    }
+                                ))
+                                fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=30, b=20), paper_bgcolor='rgba(0,0,0,0)')
+                                st.plotly_chart(fig_gauge, use_container_width=True)
 
-                        with c3:
-                            st.markdown("#### 3️⃣ Athlete vs Elite Benchmark")
-                            categories = ['Stability', 'Symmetry', 'Force', 'Mobility', 'Power']
-                            fig_radar = go.Figure()
-                            fig_radar.add_trace(go.Scatterpolar(r=[50, 40, 80, 60, 70], theta=categories, fill='toself', name='Athlete', line_color='#EF553B'))
-                            fig_radar.add_trace(go.Scatterpolar(r=[90, 95, 80, 85, 90], theta=categories, fill='toself', name='Elite', line_color='#00CC96', opacity=0.3))
-                            fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), height=250, margin=dict(l=30, r=30, t=30, b=20), paper_bgcolor='rgba(0,0,0,0)')
-                            st.plotly_chart(fig_radar, use_container_width=True)
+                            with c3:
+                                st.markdown("#### 3️⃣ Athlete vs Elite Benchmark")
+                                categories = ['Stability', 'Symmetry', 'Force', 'Mobility', 'Power']
+                                fig_radar = go.Figure()
+                                fig_radar.add_trace(go.Scatterpolar(r=[50, 40, 80, 60, 70], theta=categories, fill='toself', name='Athlete', line_color='#EF553B'))
+                                fig_radar.add_trace(go.Scatterpolar(r=[90, 95, 80, 85, 90], theta=categories, fill='toself', name='Elite', line_color='#00CC96', opacity=0.3))
+                                fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), height=250, margin=dict(l=30, r=30, t=30, b=20), paper_bgcolor='rgba(0,0,0,0)')
+                                st.plotly_chart(fig_radar, use_container_width=True)
 
-                        # --- ROW 2: ADVANCED KINETICS ---
-                        st.subheader("📉 Deep Dive Kinetics")
-                        c4, c5, c6 = st.columns(3)
+                            # --- ROW 2: ADVANCED KINETICS ---
+                            st.subheader("📉 Deep Dive Kinetics")
+                            c4, c5, c6 = st.columns(3)
 
-                        with c4:
-                            st.markdown("#### 4️⃣ Joint Angle Timeline")
-                            fig_line = go.Figure()
-                            fig_line.add_trace(go.Scatter(x=frames, y=knee_flexion, mode='lines', name='Flexion', line=dict(color='#636EFA')))
-                            fig_line.add_trace(go.Scatter(x=frames, y=valgus_stress, mode='lines', name='Valgus Stress', line=dict(color='#EF553B', dash='dot')))
-                            fig_line.update_layout(
-                                xaxis_title="Frame (Time)", yaxis_title="Angle (°)", 
-                                height=250, margin=dict(l=10, r=10, t=30, b=10), legend=dict(orientation="h", y=1.1),
-                                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white")
-                            )
-                            st.plotly_chart(fig_line, use_container_width=True)
+                            with c4:
+                                st.markdown("#### 4️⃣ Joint Angle Timeline")
+                                fig_line = go.Figure()
+                                fig_line.add_trace(go.Scatter(x=frames, y=knee_flexion, mode='lines', name='Flexion', line=dict(color='#636EFA')))
+                                fig_line.add_trace(go.Scatter(x=frames, y=valgus_stress, mode='lines', name='Valgus Stress', line=dict(color='#EF553B', dash='dot')))
+                                fig_line.update_layout(
+                                    xaxis_title="Frame (Time)", yaxis_title="Angle (°)", 
+                                    height=250, margin=dict(l=10, r=10, t=30, b=10), legend=dict(orientation="h", y=1.1),
+                                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white")
+                                )
+                                st.plotly_chart(fig_line, use_container_width=True)
 
-                        with c5:
-                            st.markdown("#### 5️⃣ Ground Reaction Force (GRF)")
-                            fig_area = go.Figure()
-                            fig_area.add_trace(go.Scatter(x=frames, y=grf_left, stackgroup='one', name='Left Leg', line=dict(color='#00CC96')))
-                            fig_area.add_trace(go.Scatter(x=frames, y=grf_right, stackgroup='one', name='Right Leg', line=dict(color='#AB63FA')))
-                            fig_area.update_layout(
-                                xaxis_title="Frame", yaxis_title="Force (N)", 
-                                height=250, margin=dict(l=10, r=10, t=30, b=10), legend=dict(orientation="h", y=1.1),
-                                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white")
-                            )
-                            st.plotly_chart(fig_area, use_container_width=True)
+                            with c5:
+                                st.markdown("#### 5️⃣ Ground Reaction Force (GRF)")
+                                fig_area = go.Figure()
+                                fig_area.add_trace(go.Scatter(x=frames, y=grf_left, stackgroup='one', name='Left Leg', line=dict(color='#00CC96')))
+                                fig_area.add_trace(go.Scatter(x=frames, y=grf_right, stackgroup='one', name='Right Leg', line=dict(color='#AB63FA')))
+                                fig_area.update_layout(
+                                    xaxis_title="Frame", yaxis_title="Force (N)", 
+                                    height=250, margin=dict(l=10, r=10, t=30, b=10), legend=dict(orientation="h", y=1.1),
+                                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white")
+                                )
+                                st.plotly_chart(fig_area, use_container_width=True)
 
-                        with c6:
-                            st.markdown("#### 6️⃣ Limb Asymmetry Index")
-                            fig_bar = go.Figure()
-                            fig_bar.add_trace(go.Bar(x=['Left', 'Right'], y=[np.max(grf_left), np.max(grf_right)], marker_color=['#00CC96', '#AB63FA']))
-                            fig_bar.update_layout(
-                                yaxis_title="Peak Force (N)", 
-                                height=250, margin=dict(l=10, r=10, t=30, b=10),
-                                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white")
-                            )
-                            st.plotly_chart(fig_bar, use_container_width=True)
+                            with c6:
+                                st.markdown("#### 6️⃣ Limb Asymmetry Index")
+                                fig_bar = go.Figure()
+                                fig_bar.add_trace(go.Bar(x=['Left', 'Right'], y=[np.max(grf_left), np.max(grf_right)], marker_color=['#00CC96', '#AB63FA']))
+                                fig_bar.update_layout(
+                                    yaxis_title="Peak Force (N)", 
+                                    height=250, margin=dict(l=10, r=10, t=30, b=10),
+                                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white")
+                                )
+                                st.plotly_chart(fig_bar, use_container_width=True)
+                    except Exception as e:
+                        st.error(f"❌ Analysis Failed: {e}")
+                        st.warning("Please verify the video file format (MP4 recommended) and your internet connection.")
 
             else:
                 st.info("👈 Waiting for video upload to initialize engine...")

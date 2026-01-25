@@ -34,6 +34,14 @@ class WellnessInput(BaseModel):
     life_stress: int
     mental_fatigue: int
 
+class LogEntryInput(BaseModel):
+    player_id: str
+    rpe: float
+    duration: int
+    sleep_hours: float
+    mood: int
+    soreness: int
+
 class AnalysisInput(BaseModel):
     biometrics: Optional[BiometricsInput] = None
     load_metrics: Optional[LoadMetricsInput] = None
@@ -41,6 +49,9 @@ class AnalysisInput(BaseModel):
     mechanics: Optional[Dict[str, Any]] = None
     # REQUIRED: The dashboard sends a list of lists [[load, hrv, sleep], ...]
     history: Optional[List[List[float]]] = None 
+    
+    # Optional Log Entry
+    log_entry: Optional[LogEntryInput] = None 
 
 # ==========================================
 # 2. OUTPUT MODELS (What the Backend Returns)

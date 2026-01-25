@@ -4,8 +4,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
+import uuid
 from app.db.database import get_db
-from app.db.models import UserDB
+from app.models.user import User
 from app.core import security
 from app.core.config import settings
 
@@ -23,12 +24,13 @@ class UserCreate(BaseModel):
 @router.post("/signup")
 def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     # 1. Check if user exists
-    user = db.query(UserDB).filter(UserDB.email == user_in.email).first()
+    user = db.query(User).filter(User.email == user_in.email).first()
     if user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
     # 2. Create new user
-    new_user = UserDB(
+    new_user = User(
+        id=str(uuid.uuid4()), # Generate String ID
         email=user_in.email,
         hashed_password=security.get_password_hash(user_in.password),
         full_name=user_in.full_name,
@@ -45,7 +47,7 @@ def login(
     db: Session = Depends(get_db)
 ):
     # 1. Find user
-    user = db.query(UserDB).filter(UserDB.email == form_data.username).first()
+    user = db.query(User).filter(User.email == form_data.username).first()
     
     # 2. Verify Password
     if not user or not security.verify_password(form_data.password, user.hashed_password):

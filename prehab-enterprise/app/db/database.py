@@ -7,17 +7,24 @@ from app.core.config import settings
 SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
 # 2. CREATE ENGINE
-# The connect_args dictionary addresses the "client encoding" error specific to Supabase Poolers
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    pool_pre_ping=True,
-    connect_args={
+# 2. CREATE ENGINE
+connect_args = {}
+if "sqlite" in SQLALCHEMY_DATABASE_URL:
+    connect_args = {"check_same_thread": False}
+else:
+    connect_args = {
         "keepalives": 1,
         "keepalives_idle": 30,
         "keepalives_interval": 10,
         "keepalives_count": 5,
         "options": "-c client_encoding=UTF8"
     }
+
+print(f"DEBUG: Connecting to {SQLALCHEMY_DATABASE_URL}")
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, 
+    pool_pre_ping=True,
+    connect_args=connect_args
 )
 
 # 3. SESSION & BASE

@@ -9,7 +9,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8 
     
     # PASTE YOUR REAL SUPABASE URL HERE
-    DATABASE_URL: str = "postgresql://postgres:YOUR_REAL_PASSWORD@aws-0-ap-south-1.pooler.supabase.com:6543/postgres"
+    # SUPABASE URL (From verify_fix.py credentials) - FAILED CONNECTION
+    # DATABASE_URL: str = "postgresql://postgres.lobmtyvthfsjhdpadvdi:SuperSecretPass123%23@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
+    
+    # FALLBACK: SQLite - Now with fixed table creation in main.py
+    DATABASE_URL: str = "sqlite:///./prehab_v5.db"
 
     class Config:
         case_sensitive = True

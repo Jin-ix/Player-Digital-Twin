@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, JSON, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, JSON, ForeignKey, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
@@ -7,7 +7,8 @@ class BiometricLog(Base):
     __tablename__ = "biometric_logs"
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    # Update to String to match User.id
+    user_id = Column(String, ForeignKey("users.id"))
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     
     # Shared Metrics
@@ -21,4 +22,4 @@ class BiometricLog(Base):
     # AI Results
     ai_insights = Column(JSON, nullable=True)
 
-    user = relationship("User", back_populates="biometrics")
+    # user = relationship("User", back_populates="biometrics")
